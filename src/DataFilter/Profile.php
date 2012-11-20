@@ -1,0 +1,350 @@
+<?php
+
+
+/*
+ * This file is part of DataFilter.
+ *
+ * (c) Ulrich Kautz <ulrich.kautz@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace DataFilter;
+
+/**
+ * Filtering data
+
+<code>
+
+$df = new \DataFilter\Profile([
+    'attribs' => [
+        'attribName' => [
+
+            // make required
+            'required' => true,
+
+            // enable match any mode (default: match all) -> as long as ONE rules matches, validation OK
+            'matchAny' => true,
+
+            // default value, if not given (implies optional)
+            'default' => 'a1',
+
+            // custom error when missing (only if no default and required)
+            'missing' => 'Where is :attrib:?',
+
+            // rules are applied as given
+            'rules' => [
+
+                // user defined callback (func ref)
+                'someCallback' => [
+                    'constraint' => function($input, $attrib, $rule, $dataFilter) {
+                        error_log("I am in rule ". $rule->getName(). " for attrib ". $attrib->getName());
+                        return strlen($input) < 5;
+                    },
+                    'error'      => 'Input for :attrib: is to long',
+                ],
+
+                // user defined callback (callable)
+                'someCallback' => [
+                    'constraint' => array('\\MyClass', 'myMethod'),
+                    'error'      => 'Something is wrong with :attrib:',
+
+                    // if this rule matches -> no other is required
+                    'sufficient' => true,
+                ],
+
+                // using regex
+                'someRegex' => [
+                    'constraint' => 'Regex:/^a[0-9]+$/',
+                    'error'      => 'String format should be "a" followed by numbers for :attrib:',
+                ],
+
+                // shortcut with no custom error
+                'otherRule' => function($input) {
+                    return time() % 2;
+                },
+
+            ],
+
+            // make other attribs required via dependencies
+            'dependent' => [
+
+                // if "a123" matches
+                'a123' => ['otherAttrib', 'yetAnother'],
+
+                // if no other matches => this matches
+                '*' => ['otherAttrib']
+            ],
+
+            // make other attribs required via dependencies (regex)
+            'dependentRegex' => [
+                '/^(a1)[234]/' => ['otherAttrib'],
+            ],
+
+            // pre-validation input filters
+            'preFilters' => [
+                function($input, $attrib) {
+                    return $input . '0';
+                }
+            ],
+
+            // post-validation input filters
+            'postFilters' => [
+                function($input, $attrib) {
+                    return $input . '0';
+                }
+            ]
+        ],
+
+        // an optional attrib with a constraint
+        'fooBar' => 'Regex:/^foo/',
+
+        // a required attrib, no validation
+        'otherAttrib' => true,
+
+        // an optional attrib, no validation
+        'yetAnother' => false
+    ],
+
+    // default error template
+    'errorTemplate' => 'Attribute ":attrib:" is frong (rule :rule:)',
+
+    // classes for predefined (string) rules
+    'ruleClasses' => ['\\MyPredefinedRules'],
+
+    /// classes for predefined (string) filters
+    'filterClasses' => ['\\MyPredefinedFilters'],
+
+    // global pre filters to be applied on all inputs -> run before
+    'preFilters' => [
+        array('\\MyClass', 'filterMethod'),
+    ],
+
+    // global post filters to be applied on all inputs (including unknown but not invalid)
+    'postFilters' => [
+        array('\\MyClass', 'filterMethod'),
+    ]
+
+]);
+
+$inputData = [
+];
+
+if ($df->check($inputData)) {
+    echo "OK, all good\n";
+}
+else {
+    $res = $df->getLastResult();
+    foreach ($res->getErrors() as $error) {
+        echo "Err: $error\n";
+    }
+
+    if ($res->getErrorFor('attr'
+}
+
+</code>
+ *
+ * @author Ulrich Kautz <ulrich.kautz@gmail.com>
+ */
+
+class Profile
+{
+    use \DataFilter\Traits\Filter;
+
+    /**
+     * @const string
+     */
+    const DEFAULT_ERROR = 'Attribute ":attrib:" does not match ":rule:"';
+
+    /**
+     * @const string
+     */
+    const DEFAULT_MISSING = 'Attribute ":attrib:" is missing';
+
+
+    /**
+     * @var array
+     */
+    protected $attribs;
+
+    /**
+     * @var array
+     */
+    protected $predefinedRuleClasses = [
+        '\\DataFilter\\PredefinedRules\\Basic'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $predefinedFilterClasses = [
+        '\\DataFilter\\PredefinedFilters\\Basic'
+    ];
+
+    /**
+     * @var string
+     */
+    protected $errorTemplate = self::DEFAULT_ERROR;
+
+    /**
+     * @var string
+     */
+    protected $missingTemplate = self::DEFAULT_MISSING;
+
+    /**
+     * @var \DataFilter\Result
+     */
+    protected $lastResult;
+
+
+
+    /**
+     * Constructor for DataFilter\DataFilter
+     *
+     * @param array  $definition  Optional definition
+     */
+    public function __construct($definition)
+    {
+        if (isset($definition['errorTemplate'])) {
+            $this->errorTemplate = $definition['errorTemplate'];
+        }
+        if (isset($definition['missingTemplate'])) {
+            $this->missingTemplate = $definition['missingTemplate'];
+        }
+        foreach (['ruleClasses', 'filterClasses'] as $var) {
+            if (isset($definition[$var])) {
+                $accessor = 'predefined'. ucfirst($var);
+                foreach ($definition[$var] as $addClass) {
+                    array_push($this->$accessor, $addClass);
+                }
+                array_unique($this->$accessor);
+            }
+        }
+        if (isset($definition['preFilters'])) {
+            $this->addFilters('pre', $definition['preFilters']);
+        }
+        if (isset($definition['postFilters'])) {
+            $this->addFilters('post', $definition['postFilters']);
+        }
+        if (isset($definition['attribs'])) {
+            $this->addAttribs($definition['attribs']);
+        } elseif (isset($definition['attributes'])) {
+            $this->addAttribs($definition['attributes']);
+        }
+    }
+
+
+    /**
+     * The long description
+     *
+     * @param array  $attribsDefinition  Attrib/rule definition
+     */
+    public function addAttribs($attribsDefinition)
+    {
+        foreach ($attribsDefinition as $attribName => $definition) {
+            $this->attribs[$attribName] = new \DataFilter\Attribute($attribName, $definition, $this);
+        }
+    }
+
+    /**
+     * Returns list of attributes (assoc array)
+     *
+     * @return array
+     */
+    public function getAttribs()
+    {
+        return $this->attribs;
+    }
+
+    /**
+     * Returns single attribute (or null)
+     *
+     * @param string  $attribName  Name of attrib
+     *
+     * @return \DataFilter\Attribute
+     */
+    public function getAttrib($attribName)
+    {
+        return isset($this->attribs[$attribName]) ? $this->attribs[$attribName] : null;
+    }
+
+    /**
+     * Returns list of predefined rule classes
+     *
+     * @return array
+     */
+    public function getPredefinedRuleClasses()
+    {
+        return $this->predefinedRuleClasses;
+    }
+
+    /**
+     * Returns list of predefined filter classes
+     *
+     * @return array
+     */
+    public function getPredefinedFilterClasses()
+    {
+        return $this->predefinedFilterClasses;
+    }
+
+
+    /**
+     * Returns default error template
+     *
+     * @return string
+     */
+    public function getErrorTemplate()
+    {
+        return $this->errorTemplate;
+    }
+
+    /**
+     * Returns default missing template
+     *
+     * @return string
+     */
+    public function getMissingTemplate()
+    {
+        return $this->missingTemplate;
+    }
+
+    /**
+     * Returns the last check result
+     *
+     * @return \DataFilter\Result
+     */
+    public function getLastResult()
+    {
+        return $this->lastResult;
+    }
+
+    /**
+     * Check this rule against input
+     *
+     * @param array  $data  Input data
+     *
+     * @return bool
+     */
+    public function run($data)
+    {
+        $this->lastResult = new \DataFilter\Result($this);
+        $this->lastResult->check($data);
+        return $this->lastResult;
+    }
+
+    /**
+     * Check this rule against input
+     *
+     * @param array  $data  Input data
+     *
+     * @return bool
+     */
+    public function check($data)
+    {
+        return !$this->run($data)->hasError();
+    }
+
+
+}

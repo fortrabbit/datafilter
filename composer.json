@@ -1,0 +1,22 @@
+{
+    "name": "datafilter/datafilter",
+    "version": "0.1.0-dev",
+    "type": "library",
+    "description": "Data filtering and validation",
+    "keywords": ["validation", "sanitation"],
+    "homepage": "http://github.com/fortrabbit/datafilter",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ulrich Kautz",
+            "email": "uk@fortrabbit.de",
+            "homepage": "http://fortrabbit.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": { "DataFilter": "src/" }
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "attribs": {
+        "attrib1": {
+            "required": true,
+            "rules": {
+                "length": {
+                    "constraint": "LenRange:3:8",
+                    "error": "Attrib 1 needs to be 3 to 8 characters long"
+                },
+                "format": {
+                    "constraint": "Regex:/^\\[u-[a-z0-9]+\\]$/",
+                    "error"     : "Username should look like 'u-foo'"
+                }
+            },
+            "preFilters": [
+                "Trim",
+                ["\\DataFilter\\MyPredefinedFilter", "myFilter"]
+            ]
+        },
+        "attrib2": true,
+        "attrib3": false
+    }
+}
