@@ -62,6 +62,11 @@ class Attribute
     protected $matchAny = false;
 
     /**
+     * @var bool
+     */
+    public $noFilters = false;
+
+    /**
      * @var string
      */
     public $default = null;
@@ -135,8 +140,10 @@ class Attribute
             $definition = array_merge(self::$DEFAULT_ATTRIBS, $definition);
 
             // set attribs
-            foreach (['required', 'matchAny', 'default', 'dependent', 'dependentRegex', 'missing'] as $k) {
-                $this->$k = $definition[$k];
+            foreach (['required', 'matchAny', 'noFilters', 'default', 'dependent', 'dependentRegex', 'missing'] as $k) {
+                if (isset($definition[$k])) {
+                    $this->$k = $definition[$k];
+                }
             }
 
             // add all rules
@@ -374,6 +381,16 @@ class Attribute
     }
 
     /**
+     * Returns whether filters are enabled to use
+     *
+     * @return bool
+     */
+    public function useFilters()
+    {
+        return !$this->noFilters;
+    }
+
+    /**
      * Sets required mode
      *
      * @param bool  $mode  The mode. Defaults to true
@@ -391,6 +408,16 @@ class Attribute
     public function setMatchAny($mode = true)
     {
         $this->matchAny = $mode;
+    }
+
+    /**
+     * Sets noFilters mode
+     *
+     * @param bool  $mode  The state. Defaults to true
+     */
+    public function setNoFilters($mode = true)
+    {
+        $this->noFilters = $mode;
     }
 
     /**

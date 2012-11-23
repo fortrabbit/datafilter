@@ -7,7 +7,7 @@ use \DataFilter\Util as U;
 class ProgrammaticTest extends \PHPUnit_Framework_TestCase
 {
 
-    public function testMultiLevel()
+    public function testManipulateRules()
     {
         $df = new \DataFilter\Profile([
             'attribs' => [
@@ -39,6 +39,49 @@ class ProgrammaticTest extends \PHPUnit_Framework_TestCase
         // remove required again
         $df->getAttrib('attrib1')->setRequired(false);
         $this->assertTrue($df->check([]));
+    }
+
+    public function testToggleFilters()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib1' => [
+                    'required' => true,
+                    'preFilters' => [
+                        function($in) {
+                            return '>'. $in;
+                        }
+                    ],
+                    'postFilters' => [
+                        function ($in) {
+                            return $in. '<';
+                        }
+                    ]
+                ]
+            ],
+            'preFilters' => [
+                function ($in) {
+                    return '['. $in;
+                }
+            ],
+            'postFilters' => [
+                function ($in) {
+                    return $in. ']';
+                }
+            ]
+        ]);
+
+        $res = $df->run(['attrib1' => 'foo']);
+        $this->assertFalse($res->hasError());
+
+        $value = $res->getData('attrib1');
+        $this->assertEquals($value, '[>foo<]');
+
+        $df->getAttrib('attrib1')->setNoFilters(true);
+        $res = $df->run(['attrib1' => 'foo']);
+        $value = $res->getData('attrib1');
+        $this->assertEquals($value, 'foo');
+
     }
 
 

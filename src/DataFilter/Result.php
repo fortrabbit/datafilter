@@ -264,6 +264,46 @@ class Result
     }
 
     /**
+     * Returns attribute of named attrib if existing (either valid or invalid)
+     *
+     * @param string  $attribName  Name of the attrib
+     *
+     * @return \DataFilter\Attribute
+     */
+    public function getAttrib($attribName)
+    {
+        if (isset($this->validAttribs[$attribName])) {
+            return $this->validAttribs[$attribName]['attrib'];
+        }
+        elseif (isset($this->invalidAttribs[$attribName])) {
+            return $this->invalidAttribs[$attribName]['attrib'];
+        }
+        return null;
+    }
+
+    /**
+     * Returns value of named attrib if existing (either valid, invalid or unknown)
+     *
+     * @param string  $attribName  Name of the attrib
+     *
+     * @return string
+     */
+    public function getData($attribName)
+    {
+        if (isset($this->validAttribs[$attribName])) {
+            return $this->validAttribs[$attribName]['value'];
+        }
+        elseif (isset($this->invalidAttribs[$attribName])) {
+            return $this->invalidAttribs[$attribName]['value'];
+        }
+        elseif (isset($this->unknownAttribs[$attribName])) {
+            return $this->unknownAttribs[$attribName];
+        }
+        return null;
+    }
+
+
+    /**
      * Returns whether has error
      *
      * @return bool
@@ -337,21 +377,23 @@ class Result
             $attrib = $this->dataFilter->getAttrib($attribName);
             $seenAttrib[$attribName] = true;
 
-            $value = $this->dataFilter->applyFilter('pre', $value);
-
             // unknown attrib
             if (!$attrib) {
-                $this->unknownAttribs[$attribName] = $value;
+                $this->unknownAttribs[$attribName] = $this->dataFilter->applyFilter('pre', $value);
                 continue;
             }
 
             // run pre-filters
-            $value = $attrib->applyFilter('pre', $value);
+            if ($attrib->useFilters()) {
+                $value = $this->dataFilter->applyFilter('pre', $attrib->applyFilter('pre', $value));
+            }
 
             // successfull check
             if ($attrib->check($value)) {
                 $this->validAttribs[$attribName] = [
-                    'value'  => $this->dataFilter->applyFilter('post', $attrib->applyFilter('post', $value)),
+                    'value'  => $attrib->useFilters()
+                        ? $this->dataFilter->applyFilter('post', $attrib->applyFilter('post', $value))
+                        : $value,
                     'attrib' => &$attrib
                 ];
 
