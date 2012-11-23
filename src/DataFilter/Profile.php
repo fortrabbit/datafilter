@@ -204,7 +204,7 @@ class Profile
      *
      * @param array  $definition  Optional definition
      */
-    public function __construct($definition)
+    public function __construct($definition = [])
     {
         if (isset($definition['errorTemplate'])) {
             $this->errorTemplate = $definition['errorTemplate'];
@@ -231,6 +231,8 @@ class Profile
             $this->setAttribs($definition['attribs']);
         } elseif (isset($definition['attributes'])) {
             $this->setAttribs($definition['attributes']);
+        } else {
+            $this->attribs = [];
         }
     }
 

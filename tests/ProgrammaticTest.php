@@ -9,13 +9,9 @@ class ProgrammaticTest extends \PHPUnit_Framework_TestCase
 
     public function testManipulateRules()
     {
-        $df = new \DataFilter\Profile([
-            'attribs' => [
-                'attrib1' => false,
-                'attrib2' => false,
-                'attrib3' => false,
-            ],
-        ]);
+        $df = new \DataFilter\Profile();
+
+        $df->setAttrib('attrib1', false);
 
         // all optional
         $this->assertTrue($df->check([]));
