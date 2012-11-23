@@ -87,6 +87,28 @@ class Basic
     }
 
     /**
+     * Check regex against input and returns reveresed result
+     *
+     * @param string  $regex  Name of the rule (unique per attribute)
+     *
+     * @return callable
+     */
+    public static function ruleRegexInverse($regex)
+    {
+        $args = func_get_args();
+        $regex = join(':', $args);
+
+        /*not in format "/../<modifier>", "#..#<modifier>"  nor "~..~<modifier>" */
+        if (!preg_match('/^([\/#~]).+\1[msugex]*$/', $regex)) {
+            $regex = '/'. stripslashes($regex). '/';
+        }
+
+        return function ($input) use ($regex) {
+            return !preg_match($regex, $input);
+        };
+    }
+
+    /**
      * Check whether input os numeric using "is_numeric()" method
      *
      * @return callable

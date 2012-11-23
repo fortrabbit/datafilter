@@ -115,6 +115,31 @@ trait Filter
     }
 
     /**
+     * Add multiple pre-filters at once
+     *
+     * @param array   $filters   List of filters
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addPreFilters($filters)
+    {
+        return $this->addFilters('pre', $filters);
+    }
+
+    /**
+     * Add multiple post-filters at once
+     *
+     * @param array   $filters   List of filters
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addPostFilters($filters)
+    {
+        return $this->addFilters('post', $filters);
+    }
+
+
+    /**
      * Runs filter on input
      *
      * @param string  $position  Either "pre" or "post"
