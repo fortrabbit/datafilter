@@ -236,6 +236,32 @@ class Profile
         }
     }
 
+    /**
+     * Construct from JSON file
+     *
+     * @param string  $jsonFile  The JSON file
+     *
+     * @return \DataFilter\Profile
+     *
+     * @throws \RuntimeException
+     */
+    public static function fromJson($jsonFile)
+    {
+        if (!is_file($jsonFile) && !is_readable($jsonFile)) {
+            throw new \RuntimeException("Either '$jsonFile' is not a file or cannot access it");
+        }
+        $content = file_get_contents($jsonFile);
+        if (!$content) {
+            throw new \RuntimeException("Cannot load empty JSON file '$jsonFile'");
+        }
+        $json = json_decode($content, true);
+        if (!$json) {
+            throw new \RuntimeException("Could not parse JSON from '$jsonFile'");
+        }
+        return new \DataFilter\Profile($json);
+    }
+
+
 
     /**
      * Set (replace/add) multiple named attribs at once
