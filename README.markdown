@@ -47,9 +47,15 @@ A basic example, which expects two POST parameters, both required
 
 # In Depth
 
+Profiles are the core of DataFilter validation and filtering (also sanitization). There are three possibilities to create those profiles: using inline PHP definitions, using external definitions written in meta-languages (JSON is natively supported) or using a programmatic approach coding definitions at runtime.
+
+Depending on how complex your validation problems are, imo it's a good idea to either use inline PHP definitions or put the profiles in JSON files. On runtime, you can then modify the loaded profiles appropriately.
+
 ## Validation Profile
 
-A validation profile is a set of attributes each having (possibly multiple) rules. You can think of it as a single formular or as the general attribute validation for a Model (ORM..).
+A validation profile is a set of attributes each having (possibly multiple) rules. You can think of it as a single form or as the general attribute validation for a Model (ORM..).
+
+Following im showing the inline PHP approach (see above).
 
 ### Structure
 
@@ -251,3 +257,45 @@ Additionally there are `dependentRegex`, which work the same way but having regu
     ]
 
 Dependencies can be useful in the context of conditional formular parts (eg if a radio input switches a part of the formular on or off).
+
+## Using JSON
+
+You can put definitions in JSON files and load them into a profile.
+
+**def.json**:
+
+    {
+        "attribs": {
+            "someAttrib": true,
+            "otherAttrib": {
+                "required": false,
+                "rules": {
+                    "isEmail": "Email",
+                    ...
+                }
+            },
+            ...
+        },
+        "preFilters" => [ ... ],
+        ...
+    }
+
+Then load the definition
+
+    $profile = \DataFilter\Profile::loadJson("def.json");
+
+The problem with definitions outsourced in JSON files is of course, that you cannot use function callables (`function() {..}`). However, using the programmatic approach (described below), you can add those rules/filters at runtime.
+
+## Programmatic
+
+This option should be mainly used to modify pre-defined profiles at runtime, if needed. You could also create complete profiles from the scratch, but in my opinion, this would only muddy the code.
+
+    $profile = new \DataFilter\Profile();
+    $profile->setAttrib('email');
+    $email = $profile->getAttrib('email');
+    $email->setRule('checkMail', 'Email');
+    $email->setRule('checkSomething', function($in) {
+        return strlen($in) > 4 && preg_match('/aaa/', $in);
+    });
+    # ..
+
