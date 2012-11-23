@@ -123,28 +123,124 @@ class Basic
     }
 
     /**
-     * Check whether input is web compliant -> usable for URL
+     * Check whether input is in given array..
      *
      * @return callable
      */
-    public static function ruleWebCompliant()
+    public static function ruleInArray()
     {
-        return function ($input) {
-            return preg_match('/^(?:[0-9a-zA-Z]+[\-_~\.])*[0-9a-zA-Z]+$/', $input);
+        $check = func_get_args();
+        return function ($input) use ($check) {
+            return in_array($input, $check);
         };
     }
 
     /**
-     * Check whether input is web compliant -> usable for URL, including unicode (eg cyrillic, arabic and whatnot) letters
+     * Check whether input is a date string
      *
      * @return callable
      */
-    public static function ruleWebCompliantUnicode()
+    public static function ruleDate()
+    {
+        return function ($input) {
+            $date = null;
+            try {
+                $date = date_parse($input);
+                if ($date['warning_count'] === 0 && $date['error_count'] === 0) {
+                    return strlen($date['hour']) === 0;
+                }
+                else {
+                    return false;
+                }
+            }
+            catch(\Exception $e) {
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Check whether input is a time string
+     *
+     * @return callable
+     */
+    public static function ruleTime()
+    {
+        return function ($input) {
+            $date = null;
+            try {
+                $date = date_parse("2012-01-01 $input");
+                if ($date['warning_count'] === 0 && $date['error_count'] === 0) {
+                    return strlen($date['hour']) > 0;
+                }
+                else {
+                    return false;
+                }
+            }
+            catch(\Exception $e) {
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Check whether input is a datetime
+     *
+     * @return callable
+     */
+    public static function ruleDateTime()
+    {
+        return function ($input) {
+            $date = null;
+            try {
+                $date = date_parse($input);
+                return $date['warning_count'] === 0 && $date['error_count'] === 0;
+            }
+            catch(\Exception $e) {
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Check whether input is URL compatible
+     *
+     * @return callable
+     */
+    public static function ruleUrlPart()
+    {
+        return function ($input) {
+            return preg_match('/^(?:[0-9a-z]+[\-_~\.])*[0-9a-z]+$/i', $input);
+        };
+    }
+
+    /**
+     * Check whether input is URL compatible (including unicode letters)
+     *
+     * @return callable
+     */
+    public static function ruleUrlPartUnicode()
     {
         return function ($input) {
             return preg_match('/^(?:[0-9\p{L}]+[\-_~\.])*[0-9\p{L}]+$/', $input);
         };
     }
+
+    /**
+     * Checks whether given input is a syntactical correct email
+     * Using a variation of the regex given on http://www.regular-expressions.info/email.html
+     *
+     * @return callable
+     */
+    public static function ruleEmail()
+    {
+        return function ($input) {
+            return preg_match('/^[a-z0-9._%+-]+@(?:[a-z0-9-]+\.?)*[a-z0-9]+\.[a-z]{2,4}$/i', $input);
+        };
+    }
+
+
+
 
 
 }

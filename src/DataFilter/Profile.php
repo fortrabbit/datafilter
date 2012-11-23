@@ -228,23 +228,37 @@ class Profile
             $this->addFilters('post', $definition['postFilters']);
         }
         if (isset($definition['attribs'])) {
-            $this->addAttribs($definition['attribs']);
+            $this->setAttribs($definition['attribs']);
         } elseif (isset($definition['attributes'])) {
-            $this->addAttribs($definition['attributes']);
+            $this->setAttribs($definition['attributes']);
         }
     }
 
 
     /**
-     * The long description
+     * Set (replace/add) multiple named attribs at once
      *
      * @param array  $attribsDefinition  Attrib/rule definition
      */
-    public function addAttribs($attribsDefinition)
+    public function setAttribs($attribsDefinition)
     {
         foreach ($attribsDefinition as $attribName => $definition) {
-            $this->attribs[$attribName] = new \DataFilter\Attribute($attribName, $definition, $this);
+            $this->setAttrib($attribName, $definition);
         }
+    }
+
+
+    /**
+     * Set (replace/add) a named attribute
+     *
+     * @param string  $attribName        Name of the attrib
+     * @param mixed   $attribDefinition  Attrib/rule definition or \DataFilter\Attribute object
+     */
+    public function setAttrib($attribName, $attribDefinition)
+    {
+        $this->attribs[$attribName] = is_object($attribDefinition) && $attribDefinition instanceof \DataFilter\Attribute
+            ? $attribDefinition
+            : new \DataFilter\Attribute($attribName, $attribDefinition, $this);
     }
 
     /**
@@ -258,7 +272,7 @@ class Profile
     }
 
     /**
-     * Returns single attribute (or null)
+     * Returns single attribute by name (or null)
      *
      * @param string  $attribName  Name of attrib
      *
@@ -267,6 +281,22 @@ class Profile
     public function getAttrib($attribName)
     {
         return isset($this->attribs[$attribName]) ? $this->attribs[$attribName] : null;
+    }
+
+    /**
+     * Removes a single attribute by name
+     *
+     * @param string  $attribName  Name of the attrib
+     *
+     * @return bool  Whether removed
+     */
+    public function removeAttrib($attribName)
+    {
+        if (isset($this->attribs[$attribName])) {
+            unset($this->attribs[$attribName]);
+            return true;
+        }
+        return false;
     }
 
     /**

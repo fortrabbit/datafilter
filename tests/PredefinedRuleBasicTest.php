@@ -138,14 +138,93 @@ class PredefinedRuleBasicTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($df->check(['attrib1' => 'a-1']));
     }
 
-    public function testPRBasicWebCompliant()
+    public function testPRBasicInArray()
     {
         $df = new \DataFilter\Profile([
             'attribs' => [
                 'attrib1' => [
                     'rules' => [
                         'rule1' => [
-                            'constraint' => 'WebCompliant'
+                            'constraint' => 'InArray:foo:bar:123'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        $this->assertTrue($df->check(['attrib1' => 123]));
+        $this->assertTrue($df->check(['attrib1' => '123']));
+        $this->assertTrue($df->check(['attrib1' => 'foo']));
+        $this->assertTrue($df->check(['attrib1' => 'bar']));
+        $this->assertFalse($df->check(['attrib1' => 'foobar']));
+        $this->assertFalse($df->check(['attrib1' => '234']));
+    }
+
+    public function testPRBasicDate()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib1' => [
+                    'rules' => [
+                        'rule1' => [
+                            'constraint' => 'Date'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        $this->assertTrue($df->check(['attrib1' => '2012-01-01']));
+        $this->assertTrue($df->check(['attrib1' => '2012-02-01']));
+        $this->assertFalse($df->check(['attrib1' => 'foo']));
+        $this->assertFalse($df->check(['attrib1' => '2012-02-30']));
+        $this->assertFalse($df->check(['attrib1' => '2012-02-40']));
+        $this->assertFalse($df->check(['attrib1' => '2012-01-01 20:00:01']));
+    }
+
+    public function testPRBasicTime()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib1' => [
+                    'rules' => [
+                        'rule1' => [
+                            'constraint' => 'Time'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        $this->assertTrue($df->check(['attrib1' => '23:10']));
+        $this->assertTrue($df->check(['attrib1' => '23:10:20']));
+        $this->assertFalse($df->check(['attrib1' => 'foo']));
+        $this->assertFalse($df->check(['attrib1' => '2012-01-01']));
+    }
+
+    public function testPRBasicDateTime()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib1' => [
+                    'rules' => [
+                        'rule1' => [
+                            'constraint' => 'DateTime'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        $this->assertTrue($df->check(['attrib1' => '2012-01-01']));
+        $this->assertTrue($df->check(['attrib1' => '2012-01-01 23:10:20']));
+        $this->assertFalse($df->check(['attrib1' => 'foo']));
+    }
+
+    public function testPRBasicUrlPart()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib1' => [
+                    'rules' => [
+                        'rule1' => [
+                            'constraint' => 'UrlPart'
                         ]
                     ]
                 ]
@@ -157,6 +236,31 @@ class PredefinedRuleBasicTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($df->check(['attrib1' => 'a--1']));
         $this->assertFalse($df->check(['attrib1' => '-a-1']));
         $this->assertFalse($df->check(['attrib1' => 'a-1-']));
+    }
+
+    public function testPRBasicEmail()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib1' => [
+                    'rules' => [
+                        'rule1' => [
+                            'constraint' => 'Email'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        $this->assertFalse($df->check(['attrib1' => 'user']));
+        $this->assertFalse($df->check(['attrib1' => 'user@localhost']));
+        $this->assertFalse($df->check(['attrib1' => 'user@...localhost']));
+        $this->assertTrue($df->check(['attrib1' => 'user@example.com']));
+        $this->assertTrue($df->check(['attrib1' => 'User@EXAMPLE.com']));
+        $this->assertTrue($df->check(['attrib1' => 'user@exa-mple.com']));
+        $this->assertTrue($df->check(['attrib1' => 'user@exa-m-ple.com']));
+        $this->assertTrue($df->check(['attrib1' => 'user+foo@example.com']));
+        $this->assertTrue($df->check(['attrib1' => 'user@example.sub.com']));
+        $this->assertFalse($df->check(['attrib1' => 'user@example..com']));
     }
 
 

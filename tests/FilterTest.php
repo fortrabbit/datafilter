@@ -88,13 +88,13 @@ class FilterTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testPFBasicWebCompliant()
+    public function testPFBasicUrlPart()
     {
         $df = new \DataFilter\Profile([
             'attribs' => [
                 'attrib1' => true
             ],
-            'preFilters' => ['WebCompliant']
+            'preFilters' => ['UrlPart']
         ]);
         $res = $df->run(['attrib1' => 'HelloThere']);
         $data = $res->getValidData();
@@ -108,13 +108,13 @@ class FilterTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testPFBasicWebCompliantUnicode()
+    public function testPFBasicUrlPartUnicode()
     {
         $df = new \DataFilter\Profile([
             'attribs' => [
                 'attrib1' => true
             ],
-            'preFilters' => ['WebCompliantUnicode'],
+            'preFilters' => ['UrlPartUnicode'],
         ]);
         $res = $df->run(['attrib1' => '&&xجx']);
         $data = $res->getValidData();
