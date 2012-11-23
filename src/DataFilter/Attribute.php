@@ -118,8 +118,13 @@ class Attribute
         $this->preFilters = [];
         $this->postFilters = [];
 
+        // no definition
+        if (is_null($definition)) {
+            // nada, nil, nothing
+        }
+
         // required, simple
-        if ($definition === true) {
+        elseif ($definition === true) {
             $this->required = true;
         }
 
@@ -168,18 +173,19 @@ class Attribute
     }
 
     /**
-     * Set (replace/add) a single named rule
+     * Set (replace/add) a single named rule. Returns the new rule
      *
      * @param string  $ruleName  Name of the rule (unique per attribute)
      * @param mixed   $rule      the rule definition or a \DataFilter\Rule object
      *
-     * @return bool
+     * @return \DataFilter\Rule
      */
     public function setRule($ruleName, $definition)
     {
         $this->rules[$ruleName] = is_object($definition) && $definition instanceof \DataFilter\Rule
             ? $definition
             : new \DataFilter\Rule($ruleName, $definition, $this, $this->dataFilter);
+        return $this->rules[$ruleName];
     }
 
     /**

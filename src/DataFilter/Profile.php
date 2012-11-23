@@ -277,16 +277,19 @@ class Profile
 
 
     /**
-     * Set (replace/add) a named attribute
+     * Set (replace/add) a named attribute. Returns the new attrib
      *
      * @param string  $attribName        Name of the attrib
      * @param mixed   $attribDefinition  Attrib/rule definition or \DataFilter\Attribute object
+     *
+     * @return \DataFilter\Attribute
      */
-    public function setAttrib($attribName, $attribDefinition)
+    public function setAttrib($attribName, $attribDefinition = null)
     {
         $this->attribs[$attribName] = is_object($attribDefinition) && $attribDefinition instanceof \DataFilter\Attribute
             ? $attribDefinition
             : new \DataFilter\Attribute($attribName, $attribDefinition, $this);
+        return $this->attribs[$attribName];
     }
 
     /**
