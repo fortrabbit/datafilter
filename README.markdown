@@ -178,7 +178,7 @@ The complex format supports a close control over each attribute and rule. Also m
             // whether required
             'required' => true,
 
-            // whether any (first) positive rule match validates argument
+            // whether any (first) positive rule match validates argument (default: false)
             'matchAny' => false,
 
             // default value is set if attribute NOT given (empty input is still given!). Implies optional (not required)
@@ -186,6 +186,9 @@ The complex format supports a close control over each attribute and rule. Also m
 
             // default missing error text
             'missing' => 'This attribute is missing',
+
+            // whether skip all (global and local) filters (default: false)
+            'noFilter' => false,
 
             // list of ules
             'rules' => [
@@ -290,6 +293,7 @@ The problem with definitions outsourced in JSON files is of course, that you can
 
 This option should be mainly used to modify pre-defined profiles at runtime, if needed. You could also create complete profiles from the scratch, but in my opinion, this would only muddy the code.
 
+    // creating
     $profile = new \DataFilter\Profile();
     $profile->setAttrib('email');
     $email = $profile->getAttrib('email');
@@ -297,5 +301,15 @@ This option should be mainly used to modify pre-defined profiles at runtime, if 
     $email->setRule('checkSomething', function($in) {
         return strlen($in) > 4 && preg_match('/aaa/', $in);
     });
+    $email->addPostFilters([
+        function($in){
+            return ucfirst($in);
+        }
+    ]);
+    # ..
+
+    // manipulating
+    $profile = \DataFilter\Profile::fromJson("def.json");
+    $email = $profile->getAttrib('email');
     # ..
 
