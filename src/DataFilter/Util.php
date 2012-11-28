@@ -47,7 +47,7 @@ class Util
      *
      * @return array
      */
-    public static function flatten($data, $flat = [], $prefix = '')
+    public static function flatten($data, $flat = array(), $prefix = '')
     {
         foreach ($data as $key => $value) {
 

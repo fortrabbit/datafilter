@@ -12,6 +12,8 @@
 
 namespace DataFilter;
 
+use DataFilter\Filterable;
+
 /**
  * Filtering data
 
@@ -148,9 +150,8 @@ else {
  * @author Ulrich Kautz <ulrich.kautz@gmail.com>
  */
 
-class Profile
+class Profile extends Filterable
 {
-    use \DataFilter\Traits\Filter;
 
     /**
      * @const string
@@ -171,16 +172,16 @@ class Profile
     /**
      * @var array
      */
-    protected $predefinedRuleClasses = [
+    protected $predefinedRuleClasses = array(
         '\\DataFilter\\PredefinedRules\\Basic'
-    ];
+    );
 
     /**
      * @var array
      */
-    protected $predefinedFilterClasses = [
+    protected $predefinedFilterClasses = array(
         '\\DataFilter\\PredefinedFilters\\Basic'
-    ];
+    );
 
     /**
      * @var string
@@ -204,7 +205,7 @@ class Profile
      *
      * @param array  $definition  Optional definition
      */
-    public function __construct($definition = [])
+    public function __construct($definition = array())
     {
         if (isset($definition['errorTemplate'])) {
             $this->errorTemplate = $definition['errorTemplate'];
@@ -212,7 +213,7 @@ class Profile
         if (isset($definition['missingTemplate'])) {
             $this->missingTemplate = $definition['missingTemplate'];
         }
-        foreach (['ruleClasses', 'filterClasses'] as $var) {
+        foreach (array('ruleClasses', 'filterClasses') as $var) {
             if (isset($definition[$var])) {
                 $accessor = 'predefined'. ucfirst($var);
                 foreach ($definition[$var] as $addClass) {
@@ -232,7 +233,7 @@ class Profile
         } elseif (isset($definition['attributes'])) {
             $this->setAttribs($definition['attributes']);
         } else {
-            $this->attribs = [];
+            $this->attribs = array();
         }
     }
 

@@ -13,6 +13,7 @@
 namespace DataFilter;
 
 use \DataFilter\Util as U;
+use \DataFilter\Filterable;
 
 /**
  * Data attribute
@@ -22,24 +23,23 @@ use \DataFilter\Util as U;
  * @author Ulrich Kautz <ulrich.kautz@gmail.com>
  */
 
-class Attribute
+class Attribute extends Filterable
 {
-    use \DataFilter\Traits\Filter;
 
     /**
      * @var array
      */
-    protected static $DEFAULT_ATTRIBS = [
+    protected static $DEFAULT_ATTRIBS = array(
         'required'       => false,
         'matchAny'       => false,
         'default'        => null,
         'missing'        => null,
-        'rules'          => [],
-        'dependent'      => [],
-        'dependentRegex' => [],
-        'preFilters'     => [],
-        'postFilters'    => [],
-    ];
+        'rules'          => array(),
+        'dependent'      => array(),
+        'dependentRegex' => array(),
+        'preFilters'     => array(),
+        'postFilters'    => array(),
+    );
 
     /**
      * @var \DataFilter\Profile
@@ -112,11 +112,11 @@ class Attribute
     {
         $this->name = $name;
         $this->dataFilter = $dataFilter;
-        $this->rules = [];
-        $this->dependent = [];
-        $this->dependentRegex = [];
-        $this->preFilters = [];
-        $this->postFilters = [];
+        $this->rules = array();
+        $this->dependent = array();
+        $this->dependentRegex = array();
+        $this->preFilters = array();
+        $this->postFilters = array();
 
         // no definition
         if (is_null($definition)) {
@@ -138,14 +138,14 @@ class Attribute
 
             // from string or callable (simple, optioanl)
             if (is_string($definition) || is_callable($definition)) {
-                $definition = ['rules' => ['default' => $definition]];
+                $definition = array('rules' => array('default' => $definition));
             }
 
             // init empty to reduce isset checks..
             $definition = array_merge(self::$DEFAULT_ATTRIBS, $definition);
 
             // set attribs
-            foreach (['required', 'matchAny', 'noFilters', 'default', 'dependent', 'dependentRegex', 'missing'] as $k) {
+            foreach (array('required', 'matchAny', 'noFilters', 'default', 'dependent', 'dependentRegex', 'missing') as $k) {
                 if (isset($definition[$k])) {
                     $this->$k = $definition[$k];
                 }
@@ -361,9 +361,9 @@ class Attribute
     public function getMissingText()
     {
         $missing = $this->missing ?: $this->dataFilter->getMissingTemplate();
-        return U::formatString($missing, [
+        return U::formatString($missing, array(
             'attrib' => $this->name
-        ]);
+        ));
     }
 
     /**

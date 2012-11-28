@@ -352,7 +352,6 @@ class Result
                 return !is_null($txt);
             }
         );
-        //print_r(['I' => $this->getInvalidErrors(), 'M' => $this->getMissingErrors(), 'E' => $errors]);
         return $join ? join($join, $errors) : $errors;
     }
 
@@ -366,12 +365,12 @@ class Result
      */
     public function check($data)
     {
-        $this->validAttribs   = [];
-        $this->invalidAttribs = [];
-        $this->missingAttribs = [];
-        $this->unknownAttribs = [];
-        $requiredDependent    = [];
-        $seenAttrib           = [];
+        $this->validAttribs   = array();
+        $this->invalidAttribs = array();
+        $this->missingAttribs = array();
+        $this->unknownAttribs = array();
+        $requiredDependent    = array();
+        $seenAttrib           = array();
 
         foreach (U::flatten($data) as $attribName => $value) {
             $attrib = $this->dataFilter->getAttrib($attribName);
@@ -390,12 +389,12 @@ class Result
 
             // successfull check
             if ($attrib->check($value)) {
-                $this->validAttribs[$attribName] = [
+                $this->validAttribs[$attribName] = array(
                     'value'  => $attrib->useFilters()
                         ? $this->dataFilter->applyFilter('post', $attrib->applyFilter('post', $value))
                         : $value,
                     'attrib' => &$attrib
-                ];
+                );
 
                 // determine possible dependents
                 $attrib->determineDependents($value, $requiredDependent);
@@ -403,11 +402,11 @@ class Result
 
             // checks failed
             else {
-                $this->invalidAttribs[$attribName] = [
+                $this->invalidAttribs[$attribName] = array(
                     'value'  => $value,
                     'attrib' => &$attrib,
                     'error'  => $attrib->getError()
-                ];
+                );
             }
         }
 
@@ -426,10 +425,10 @@ class Result
 
             // required -> missing
             elseif ($attrib->isRequired() || isset($requiredDependent[$attribName])) {
-                $this->missingAttribs[$attribName] = [
+                $this->missingAttribs[$attribName] = array(
                     'attrib' => &$attrib,
                     'error'  => $attrib->getMissingText()
-                ];
+                );
             }
         }
 
