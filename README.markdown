@@ -6,7 +6,7 @@ The incentive to write this module is mainly rooted in the need to have a genera
 
 The second goal was to create a to which can be configured using a meta language (JSON, YAML, ..) having no need for "inline" rule definition - in short: keep the validation rules separate from the business logic.
 
-PHP 5.4 is required.
+PHP 5.3 is required (though the syntax in the examples used 5.4 array notation).
 
 # Install via Composer
 
