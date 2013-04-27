@@ -1,6 +1,6 @@
 {
     "name": "datafilter/datafilter",
-    "version": "0.1.3-dev",
+    "version": "0.1.4-dev",
     "type": "library",
     "description": "Data filtering and validation",
     "keywords": ["validation", "sanitation"],

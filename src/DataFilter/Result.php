@@ -434,7 +434,7 @@ class Result
 
             // has default
             elseif (!is_null($default = $attrib->getDefault())) {
-                $this->validAttribs[$attribName] = $default;
+                $this->validAttribs[$attribName] = ['value' => $default, 'attrib' => &$attrib];
             }
 
             // required -> missing
