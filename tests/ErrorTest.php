@@ -97,6 +97,65 @@ class ErrorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($res->hasError('attrib1') && $res->hasError('attrib2') && !$res->hasError('attrib3'));
     }
 
+    public function testErrorInheritance()
+    {
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib2' => [
+                    'error' => 'From Attrib',
+                    'rules' => [
+                        'isNotX' => [
+                            'constraint' => function($in) { return 'x' === $in; },
+                            'error'      => 'From Rule'
+                        ]
+                    ]
+                ],
+                'attrib3' => false
+            ],
+            'errorTemplate' => 'From Profile',
+        ]);
+        $res = $df->run(['attrib2' => 'foo']);
+        $errors = $res->getAllErrors();
+        $this->assertEquals($errors['attrib2'], 'From Rule');
+
+
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib2' => [
+                    'error' => 'From Attrib',
+                    'rules' => [
+                        'isNotX' => [
+                            'constraint' => function($in) { return 'x' === $in; },
+                        ]
+                    ]
+                ],
+                'attrib3' => false
+            ],
+            'errorTemplate' => 'From Profile',
+        ]);
+        $res = $df->run(['attrib2' => 'foo']);
+        $errors = $res->getAllErrors();
+        $this->assertEquals($errors['attrib2'], 'From Attrib');
+
+
+        $df = new \DataFilter\Profile([
+            'attribs' => [
+                'attrib2' => [
+                    'rules' => [
+                        'isNotX' => [
+                            'constraint' => function($in) { return 'x' === $in; },
+                        ]
+                    ]
+                ],
+                'attrib3' => false
+            ],
+            'errorTemplate' => 'From Profile',
+        ]);
+        $res = $df->run(['attrib2' => 'foo']);
+        $errors = $res->getAllErrors();
+        $this->assertEquals($errors['attrib2'], 'From Profile');
+    }
+
 }
 
 

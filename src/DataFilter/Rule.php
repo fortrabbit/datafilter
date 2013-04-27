@@ -244,7 +244,13 @@ class Rule
         if ($attrib) {
             $formatData['attrib'] = $attrib->getName();
         }
-        $error = $this->error ?: $this->dataFilter->getErrorTemplate();
+        $error = $this->error;
+        if (!$error && $attrib) {
+            $error = $attrib->getDefaultErrorStr();
+        }
+        if (!$error) {
+            $error = $this->dataFilter->getErrorTemplate();
+        }
         return U::formatString($error, $formatData);
     }
 

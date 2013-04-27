@@ -34,6 +34,7 @@ class Attribute extends Filterable
         'matchAny'       => false,
         'default'        => null,
         'missing'        => null,
+        'error'          => null,
         'rules'          => array(),
         'dependent'      => array(),
         'dependentRegex' => array(),
@@ -75,6 +76,11 @@ class Attribute extends Filterable
      * @var string
      */
     public $missing = null;
+
+    /**
+     * @var string
+     */
+    public $error = null;
 
     /**
      * @var array
@@ -145,7 +151,7 @@ class Attribute extends Filterable
             $definition = array_merge(self::$DEFAULT_ATTRIBS, $definition);
 
             // set attribs
-            foreach (array('required', 'matchAny', 'noFilters', 'default', 'dependent', 'dependentRegex', 'missing') as $k) {
+            foreach (array('required', 'matchAny', 'noFilters', 'default', 'dependent', 'dependentRegex', 'missing', 'error') as $k) {
                 if (isset($definition[$k])) {
                     $this->$k = $definition[$k];
                 }
@@ -341,6 +347,16 @@ class Attribute extends Filterable
             return $this->failedRule->getError($this);
         }
         return null;
+    }
+
+    /**
+     * Returns default error string
+     *
+     * @return string
+     */
+    public function getDefaultErrorStr()
+    {
+        return $this->error;
     }
 
     /**
